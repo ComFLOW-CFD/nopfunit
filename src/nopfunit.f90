@@ -1,8 +1,18 @@
 module no_pfunit
-use intrinsic :: iso_fortran_env, only: int16
+use iso_fortran_env, only: int16
 implicit none
 
+
+   character(len=*), parameter :: supported_options(5) = [ &
+   &      '--help                ', &
+   &      '--verbose             ', &
+   &      '--silent              ', &
+   &      '--errors-are-fatal    ', &
+   &      '--errors-are-not-fatal']
+
    integer            :: nok = 0, nerror = 0
+   integer            :: ntests_ok=0, ntests_failed=0
+   logical            :: call_print_usage = .false.
    logical            :: verbose = .false.
    logical            :: errors_are_fatal = .false.  ! keep running when an error is found, but remember the error for subroutine conclusion
    character(len=400) :: test_name = ' '
@@ -11,6 +21,13 @@ implicit none
       module procedure  assertRelativelyEqual_scalar
       module procedure  assertRelativelyEqual_dble_scalar
    end interface assertRelativelyEqual
+
+   abstract interface
+      subroutine run_a_test_interface(test_name)
+      implicit none
+         character(len=*), intent(in) :: test_name
+      end subroutine run_a_test_interface
+   end interface
 
    interface assertEqual
       module procedure  assertEqual_array_string
@@ -79,6 +96,7 @@ contains
       if (nok + nerror > 0) return
       do iarg = 1, command_argument_count()
          call get_command_argument(iarg, arg)
+         if (arg=='--help') call_print_usage = .true.
          if (arg=='--verbose') verbose = .true.
          if (arg=='--silent') verbose = .false.
          if (arg=='--errors-are-fatal') errors_are_fatal = .true.
@@ -86,15 +104,30 @@ contains
       enddo
    end subroutine check_options
 
-   subroutine conclusion()
-      print *
+   subroutine test_conclusion()
       if (nerror == 0) then
          print '(10(a,i0))', 'test '//trim(test_name)//' finished successfully: ',nok,' assessments passed'
+         ntests_ok = ntests_ok + 1
       else
          print '(10(a,i0))', 'test '//trim(test_name)//' failed: ',nok,' assessments passed, but ',nerror,' failed'
+         ntests_failed = ntests_failed + 1
+      endif
+      nok = 0
+      nerror = 0
+   end subroutine test_conclusion
+
+   subroutine final_conclusion()
+      print *
+      if (ntests_failed == 0) then
+         print '(10(a,i0))', "     ",ntests_ok," tests finished successfully"
+      else if (ntests_ok>0) then
+         print '(10(a,i0))', "     ",ntests_ok," tests finished successfully, but ",ntests_failed," failed"
+         stop 1
+      else 
+         print '(10(a,i0))', "     All ",ntests_failed," tests failed"
          stop 1
       endif
-   end subroutine conclusion
+   end subroutine final_conclusion
 
    subroutine print_result(message, lineno, filename, msg, success)
       character(len=*), optional, intent(in) :: message
@@ -581,5 +614,69 @@ contains
       call print_result(message, lineno, filename, msg, success=abs(maxerr)==0)
 
    end subroutine assertEqual_array_int16_2d
+
+   subroutine print_usage(test_names)
+   implicit none
+      character(len=*), intent(in) :: test_names(:)
+
+      integer :: itest
+
+      print '(a)',"unit_tests [--verbose|--silent] [--errors-are-fatal|--errors-are-not-fatal] [--help] [tests]"
+      print '(a)',""
+      print '(a)',"Run specified unit test(s)"
+      print '(a)',"    --verbose                 more output"
+      print '(a)',"    --silent                  less output"
+      print '(a)',"    --errors-are-fatal        stop testing after the first error"
+      print '(a)',"    --errors-are-not-fatal    continue testing until all tests are done, then report"
+      print '(a)',""
+      print '(a)',"Avalaible tests:"
+      print '(100a)', '     '//trim(test_names(1)), (", ", trim(test_names(itest)), itest = 2,size(test_names,1))
+      print '(a)',""
+   end subroutine print_usage
+
+   subroutine unit_test_main(test_names, run_a_test)
+   implicit none
+      character(len=*), intent(in) :: test_names(:)
+      procedure(run_a_test_interface) :: run_a_test
+
+      integer                         :: iarg, itest, ioption, ntests
+      character(len=500)              :: arg
+      logical                         :: found
+
+      call check_options()
+      if (call_print_usage) then
+         call print_usage(test_names)
+         return
+      endif
+
+      ntests = 0
+      do iarg = 1, command_argument_count()
+
+         call get_command_argument(iarg, arg)
+
+         found = .false.
+         do ioption = 1,size(supported_options,1)
+            if (supported_options(ioption)==arg) then
+               found = .true.
+               exit
+            endif
+         enddo
+
+         if (found) cycle
+
+         ntests = ntests + 1
+         call run_a_test(trim(arg))
+         call test_conclusion()
+
+      enddo
+
+      if (ntests==0) then
+         do itest = 1,size(test_names,1)
+            call run_a_test(test_names(itest))
+            call test_conclusion()
+         enddo
+      endif
+      call final_conclusion()
+   end subroutine unit_test_main
 
 end module no_pfunit
