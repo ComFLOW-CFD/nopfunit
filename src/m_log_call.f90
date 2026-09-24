@@ -304,15 +304,17 @@ contains
        call add_arg(call_pattern, name, intent_INOUT, value)
     end subroutine add_string_inout
     subroutine add_double_inout(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real64
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       double precision,    intent(in)    :: value
+       real(kind=real64),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_INOUT, value)
     end subroutine add_double_inout
     subroutine add_real_inout(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real32
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       real,                intent(in)    :: value
+       real(kind=real32),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_INOUT, value)
     end subroutine add_real_inout
     subroutine add_logical_inout(call_pattern, name, value)
@@ -401,15 +403,17 @@ contains
        call add_arg(call_pattern, name, intent_OUT, value)
     end subroutine add_string_output
     subroutine add_double_output(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real64
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       double precision,    intent(in)    :: value
+       real(kind=real64),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_OUT, value)
     end subroutine add_double_output
     subroutine add_real_output(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real32
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       real,                intent(in)    :: value
+       real(kind=real32),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_OUT, value)
     end subroutine add_real_output
     subroutine add_logical_output(call_pattern, name, value)
@@ -498,15 +502,17 @@ contains
        call add_arg(call_pattern, name, intent_IN, value)
     end subroutine add_string_input
     subroutine add_double_input(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real64
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       double precision,    intent(in)    :: value
+       real(kind=real64),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_IN, value)
     end subroutine add_double_input
     subroutine add_real_input(call_pattern, name, value)
+    use, intrinsic :: iso_fortran_env, only: real32
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*),    intent(in)    :: name
-       real,             intent(in)    :: value
+       real(kind=real32),   intent(in)    :: value
        call add_arg(call_pattern, name, intent_IN, value)
     end subroutine add_real_input
     subroutine add_int_input(call_pattern, name, value)
@@ -622,10 +628,11 @@ contains
        end do
     end subroutine add_derived_arg
     subroutine add_double_arg(call_pattern, name, vintent, value)
+    use, intrinsic :: iso_fortran_env, only: real64
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*), intent(in) :: name
        integer, intent(in) :: vintent
-       double precision, intent(in) :: value
+       real(kind=real64), intent(in) :: value
 
        integer, parameter :: typ = tp_DOUBLE
        call_pattern % nargs = call_pattern % nargs + 1
@@ -635,10 +642,11 @@ contains
        call_pattern % arg_types (call_pattern % nargs) = typ
     end subroutine add_double_arg
     subroutine add_real_arg(call_pattern, name, vintent, value)
+    use, intrinsic :: iso_fortran_env, only: real32
        type(tcall_pattern), intent(inout) :: call_pattern
        character(len=*), intent(in) :: name
        integer, intent(in) :: vintent
-       real, intent(in) :: value
+       real(kind=real32), intent(in) :: value
 
        integer, parameter :: typ = tp_REAL
        call_pattern % nargs = call_pattern % nargs + 1
@@ -1420,13 +1428,15 @@ contains
     end subroutine print_logical1d_array
 
     subroutine print_double_value(name, value)
-       double precision,             intent(in) :: value
-       character(len=*), intent(in) :: name
+    use, intrinsic :: iso_fortran_env, only: real64
+       real(kind=real64), intent(in) :: value
+       character(len=*),  intent(in) :: name
        write(print_unit, '(a,1p,e16.8)') '        double precision, parameter :: '//trim(name)//' = ',value
     end subroutine print_double_value
     subroutine print_real_value(name, value)
-       real,             intent(in) :: value
-       character(len=*), intent(in) :: name
+    use, intrinsic :: iso_fortran_env, only: real32
+       real(kind=real32), intent(in) :: value
+       character(len=*),  intent(in) :: name
        write(print_unit, '(a,1p,e16.8)') '        real, parameter :: '//trim(name)//' = ',value
     end subroutine print_real_value
 
@@ -1702,9 +1712,10 @@ contains
     end subroutine print_int_declaration
 
     subroutine print_double_declaration(vintent, value, name)
-       integer,          intent(in) :: vintent
-       double precision, intent(in) :: value
-       character(len=*), intent(in) :: name
+    use, intrinsic :: iso_fortran_env, only: real64
+       integer,           intent(in) :: vintent
+       real(kind=real64), intent(in) :: value
+       character(len=*),  intent(in) :: name
        if (vintent== intent_OUT) then
           write(print_unit, '(a)')    '        double precision :: '//trim(name)
           call print_value('ref_'//trim(name), value)
@@ -1715,9 +1726,10 @@ contains
        end if
     end subroutine print_double_declaration
     subroutine print_real_declaration(vintent, value, name)
-       integer,          intent(in) :: vintent
-       real,             intent(in) :: value
-       character(len=*), intent(in) :: name
+    use, intrinsic :: iso_fortran_env, only: real32
+       integer,           intent(in) :: vintent
+       real(kind=real32), intent(in) :: value
+       character(len=*),  intent(in) :: name
        if (vintent== intent_OUT) then
           write(print_unit, '(a)')    '        real :: '//trim(name)
           call print_value('ref_'//trim(name), value)

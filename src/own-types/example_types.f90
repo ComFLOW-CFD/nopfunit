@@ -2,7 +2,7 @@ module nopfunit_tCat
 ! This module shows how you can add asserts for a derived type, in this case the type 'tCat'.
 ! There is some overhead: you have to re-create assertEqual using all the variants that 
 ! already existed, and add your own flavor to the list.
-use no_pfunit, only: assertRelativelyEqual,  assertGreaterThan, assertLessThan,  conclusion, &
+use no_pfunit, only: assertRelativelyEqual,  assertGreaterThan, assertLessThan,  test_conclusion, &
         assertEqual_array_string, assertEqual_scalar_string, assertEqual_scalar_bool, assertEqual_scalar_int, &
         assertEqual_scalar_double_notol, assertEqual_scalar_dble, assertEqual_scalar, assertEqual_scalar_notol, &
         assertEqual_array, assertEqual_array_bool, assertEqual_array_int, assertEqual_array_int16, &
